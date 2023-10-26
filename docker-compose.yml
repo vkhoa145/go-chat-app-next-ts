@@ -1,0 +1,24 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./:/app
+    tty: true 
+    ports:
+      - ${EXPOSE_PORT}:${APP_PORT}
+    env_file:
+      - .env
+  db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - ${DB_EXPOSE_PORT}:${DB_PORT}
+    env_file:
+      - .env
+    volumes:
+      - ./docker/container_data/pgdata:/var/lib/postgresql/data

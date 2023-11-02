@@ -28,6 +28,9 @@ func (server *Server) Start() error {
 		AllowOrigins:     "*",
 		AllowCredentials: true,
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+		AllowOriginsFunc: func(origin string) bool {
+			return origin == "https://localhost:3000"
+		},
 	}))
 	SetupRoutes(server)
 	return server.Fiber.Listen(":" + server.Config.HTTP.Port)

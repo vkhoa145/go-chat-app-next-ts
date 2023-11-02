@@ -67,6 +67,7 @@ func (h *Handler) JoinRoom() fiber.Handler {
 			RoomId:   roomId,
 			Username: username,
 		}
+		log.Println("read client:", client.RoomId)
 
 		message := &Message{
 			Content:  "A new user has joined the room",
@@ -75,7 +76,12 @@ func (h *Handler) JoinRoom() fiber.Handler {
 		}
 
 		h.hub.Register <- client
-		h.hub.Broadcast <- message
+
+		if err := c.WriteJSON(message); err != nil {
+			log.Println("write welcome message:", err)
+			c.Conn.Close()
+			return
+		}
 
 		var (
 			mesType int
@@ -100,6 +106,7 @@ func (h *Handler) JoinRoom() fiber.Handler {
 				RoomId:   client.RoomId,
 				Username: client.Username,
 			}
+			log.Println("msg:", msg)
 
 			h.hub.Broadcast <- msg
 		}
@@ -134,8 +141,9 @@ func (h *Handler) GetClients() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var clients []ClientRes
 		roomId := c.Params("roomId")
-
+		log.Println("roomId:", roomId)
 		if _, ok := h.hub.Rooms[roomId]; !ok {
+			log.Println("ok:", ok)
 			clients = make([]ClientRes, 0)
 			c.Status(http.StatusOK)
 			return c.JSON(&fiber.Map{"status": http.StatusOK, "clients": clients, "error": nil})
@@ -149,6 +157,6 @@ func (h *Handler) GetClients() fiber.Handler {
 			})
 		}
 		c.Status(http.StatusOK)
-		return c.JSON(&fiber.Map{"status": http.StatusOK, "clients": clients, "error": nil})
+		return c.JSON(&fiber.Map{"status": http.StatusOK, "clients111": clients, "error": nil})
 	}
 }
